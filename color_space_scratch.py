@@ -1,15 +1,5 @@
 """
-========================================================================================
-HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH VIỄN THÔNG (PTIT) - KHOA CNTT 1
-MÔN HỌC: XỬ LÝ ẢNH (MÃ HỌC PHẦN: INT13146) - GIẢNG VIÊN: THS/TS. PHẠM HOÀNG VIỆT
-ĐỒ ÁN: [CVPR'25] HVI: A New Color Space for Low-light Image Enhancement
-----------------------------------------------------------------------------------------
-BẢN QUYỀN NỘI DUNG: THÀNH VIÊN 1 (25% ĐÓNG GÓP CHUYÊN MÔN)
-MODULE: color_space_scratch.py
-MÔ TẢ:
-  Cài đặt từ đầu (from scratch) hoàn toàn bằng thư viện NumPy, tuân thủ đúng yêu cầu
-  tại Slide Chương 0 (trang 8: Không dùng các hàm xử lý màu có sẵn của OpenCV):
-  1. Biến đổi thuận sRGB -> HSV (Công thức 1, 2, 3 trong bài báo CVPR 2025 & Slide Chương 3)
+  1. Biến đổi thuận sRGB -> HSV (Công thức 1, 2, 3 trong bài báo CVPR 2025 )
   2. Biến đổi ngược HSV -> sRGB
   3. Biến đổi thuận HVIT: HSV -> HVI (Công thức 4, 5: Phân cực hóa Hue & Nén vùng tối C_k)
   4. Biến đổi ngược PHVIT: HVI -> HSV/sRGB (Công thức 6: Điều chỉnh độ sáng alpha_I, độ bão hòa alpha_S)
@@ -17,7 +7,6 @@ MÔ TẢ:
   6. Kiểm thử đối chứng với OpenCV (sRGB->HSV, Gamma, HE, Chu trình HVI)
   7. Trực quan hóa kênh màu theo mật độ k in {0.5, 1, 3, 10, 50}, mặt phẳng HS vs HV,
      và Bản đồ lỗi màu E_HS vs E_HV (tái hiện Bảng 13 - Mục 10.7 bài báo CVPR 2025).
-========================================================================================
 """
 
 import os
@@ -26,14 +15,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-# ======================================================================================
-# PHẦN 1: TỰ CÀI ĐẶT BIẾN ĐỔI sRGB <-> HSV TỪ ĐẦU (SLIDE CHƯƠNG 3, TRANG 22-33)
-# ======================================================================================
+# sRGB <-> HSV 
 
 def srgb_to_hsv_scratch(rgb_img):
     """
     Chuyển đổi ảnh sRGB sang không gian màu HSV từ đầu bằng NumPy.
-    Công thức theo Eq. 1, 2, 3 trong bài báo CVPR 2025 & Giáo trình Xử lý ảnh (Chương 3):
+    Công thức theo Eq. 1, 2, 3 trong bài báo CVPR 2025:
       - I_max(x) = max_{c in {R,G,B}} I_c(x)  (Bản đồ cường độ sáng theo lý thuyết Max-RGB)
       - Delta = I_max - min_{c} I_c
       - Độ bão hòa S = Delta / I_max (nếu I_max > 0, ngược lại = 0)
@@ -111,9 +98,7 @@ def hsv_to_srgb_scratch(hsv_img):
     return np.clip(rgb, 0.0, 1.0)
 
 
-# ======================================================================================
-# PHẦN 2: BIẾN ĐỔI KHÔNG GIAN MÀU HVI (HVIT & PHVIT) - CÔNG THỨC 1 ĐẾN 6 CVPR 2025
-# ======================================================================================
+# BIẾN ĐỔI KHÔNG GIAN MÀU HVI (HVIT & PHVIT) - CÔNG THỨC 1 ĐẾN 6 CVPR 2025
 
 def hsv_to_hvi_scratch(hsv_img, k=1.0, eps=1e-8):
     """Biến đổi thuận HVIT (HVI Transformation) từ HSV sang HVI (Eq. 4 & Eq. 5)."""
@@ -178,7 +163,6 @@ def hvi_to_srgb(hvi_img, k=1.0, alpha_I=1.0, alpha_S=1.0, eps=1e-8):
     return hsv_to_srgb_scratch(hsv)
 
 
-# Các hàm chuẩn giao tiếp (Interface) để Thành viên 4 import trực tiếp vào app_demo.py:
 def srgb_to_hvi_scratch(rgb_img, k=1.0, eps=1e-8):
     """Wrapper chuẩn trả về bộ 3 kênh (H_hat, V_hat, I_max) cho giao diện Demo."""
     hvi = srgb_to_hvi(rgb_img, k=k, eps=eps)
@@ -192,9 +176,7 @@ def hvi_to_srgb_scratch(H_hat, V_hat, I_max, k=1.0, alpha_s=1.0, alpha_i=1.0, ep
     return np.round(rgb * 255.0).astype(np.uint8)
 
 
-# ======================================================================================
-# PHẦN 3: THUẬT TOÁN CỔ ĐIỂN ĐỐI CHỨNG TỰ CODE TỪ ĐẦU (GAMMA, HE, CLAHE)
-# ======================================================================================
+# THUẬT TOÁN CỔ ĐIỂN ĐỐI CHỨNG TỰ CODE TỪ ĐẦU (GAMMA, HE, CLAHE)
 
 def gamma_correction_scratch(img, gamma=0.5, c=1.0):
     """Tăng cường độ sáng bằng biến đổi Gamma từ đầu bằng NumPy: s = c * (r ^ gamma)."""
@@ -208,7 +190,7 @@ def gamma_correction_scratch(img, gamma=0.5, c=1.0):
 
 
 def _equalize_channel_u8(chan_u8):
-    """Cân bằng lược đồ xám 1 kênh 8-bit chuẩn theo công thức CDF chuẩn hóa (khớp 100% OpenCV)."""
+    """Cân bằng lược đồ xám 1 kênh 8-bit chuẩn theo công thức CDF chuẩn hóa."""
     hist = np.bincount(chan_u8.ravel(), minlength=256)
     cdf = hist.cumsum()
     nonzero = cdf[cdf > 0]
@@ -241,11 +223,6 @@ def histogram_equalization_scratch(img):
 
 
 def clahe_scratch(img, clip_limit=2.0, grid_size=(8, 8)):
-    """
-    Tự cài đặt thuật toán CLAHE (Contrast Limited Adaptive Histogram Equalization)
-    bằng NumPy thuần túy (chia lưới ô vuông, cắt ngưỡng Histogram, phân phối lại phần dư
-    và nội suy song tuyến tính Bilinear Interpolation giữa các tâm ô lưới).
-    """
     is_uint8 = (img.dtype == np.uint8) or (img.max() > 1.0)
 
     def _clahe_channel_u8(chan_u8):
@@ -318,10 +295,7 @@ def enhance_classical_scratch(img_rgb, method="clahe", gamma=0.4):
     return clahe_scratch(img_rgb, clip_limit=2.0, grid_size=(8, 8))
 
 
-# ======================================================================================
-# PHẦN 4: HÀM ĐỐI CHỨNG VÀ ĐO ĐẠC VỚI OPENCV (NGHIỆM THU ĐỒ ÁN)
-# ======================================================================================
-
+# HÀM ĐỐI CHỨNG VÀ ĐO ĐẠC VỚI OPENCV
 def compare_with_opencv(img_rgb):
     """
     So sánh độ sai khác giữa các thuật toán tự code bằng NumPy và hàm thư viện OpenCV:
@@ -338,16 +312,13 @@ def compare_with_opencv(img_rgb):
     img_f32 = img_u8.astype(np.float32) / 255.0
     img_gray = cv2.cvtColor(img_u8, cv2.COLOR_RGB2GRAY)
 
-    print("\n" + "=" * 72)
-    print(" KẾT QUẢ ĐỐI CHỨNG THUẬT TOÁN TỰ CODE NUMPY VS THƯ VIỆN OPENCV")
-    print("=" * 72)
 
     # 0. Đối chứng sRGB -> HSV
     hsv_scratch = srgb_to_hsv_scratch(img_f32)
     hsv_cv = cv2.cvtColor(img_f32, cv2.COLOR_RGB2HSV)
     hsv_cv_norm = np.stack([hsv_cv[..., 0] / 60.0, hsv_cv[..., 1], hsv_cv[..., 2]], axis=-1)
     diff_hsv = np.abs(hsv_scratch - hsv_cv_norm)
-    print("[0] Biến đổi màu sRGB -> HSV (Tự code NumPy vs cv2.cvtColor):")
+    print("[0] Biến đổi màu sRGB -> HSV:")
     print(f"    - Max Absolute Difference: {np.max(diff_hsv):.6e}")
     print(f"    - Mean Squared Error (MSE): {np.mean(diff_hsv**2):.6e}")
 
@@ -374,15 +345,12 @@ def compare_with_opencv(img_rgb):
     rec_rgb = hvi_to_srgb(hvi, k=1.0, alpha_I=1.0, alpha_S=1.0)
     rec_u8 = (rec_rgb * 255.0).round().astype(np.uint8)
     diff_hvi_cycle = np.abs(img_u8.astype(float) - rec_u8.astype(float))
-    print("[3] Chu trình phục hồi thuận nghịch sRGB -> HVI -> sRGB:")
+    print("[3] sRGB -> HVI -> sRGB:")
     print(f"    - Max Absolute Difference: {np.max(diff_hvi_cycle):.4f} mức xám")
     print(f"    - Mean Absolute Error (MAE): {np.mean(diff_hvi_cycle):.6f} mức xám")
-    print("=" * 72 + "\n")
 
 
-# ======================================================================================
-# PHẦN 5: TẠO ẢNH TEST VÀ TRỰC QUAN HÓA (ARTIFACTS CHO BÁO CÁO & SLIDE)
-# ======================================================================================
+# PHẦN 5: TẠO ẢNH TEST VÀ TRỰC QUAN HÓA 
 
 def create_synthetic_test_pair(height=360, width=480):
     """
@@ -454,8 +422,6 @@ def plot_hvi_density_k(
     plt.tight_layout()
     plt.savefig(output_path, dpi=200, bbox_inches="tight")
     plt.close()
-    print(f"[+] Đã lưu biểu đồ khảo sát tham số k tại: {output_path}")
-
 
 def plot_error_maps_ehs_vs_ehv(
     low_img, gt_img, k=1.0, output_path="output_member1/error_map_ehs_vs_ehv.png"
@@ -511,10 +477,6 @@ def plot_error_maps_ehs_vs_ehv(
     plt.tight_layout()
     plt.savefig(output_path, dpi=200, bbox_inches="tight")
     plt.close()
-    print(
-        f"[+] Đã lưu bản đồ lỗi màu E_HS (PSNR={psnr_hs:.2f} dB) vs E_HV (PSNR={psnr_hv:.2f} dB) tại: {output_path}"
-    )
-
 
 def plot_hs_vs_hv_noise(img_rgb, output_path="output_member1/noise_hs_vs_hv.png"):
     """Vẽ mặt phẳng màu HS (của HSV) và mặt phẳng HV (của HVI) của các điểm ảnh tối."""
@@ -566,8 +528,6 @@ def plot_hs_vs_hv_noise(img_rgb, output_path="output_member1/noise_hs_vs_hv.png"
     plt.tight_layout()
     plt.savefig(output_path, dpi=200, bbox_inches="tight")
     plt.close()
-    print(f"[+] Đã lưu bản đồ phân tích nhiễu màu HS vs HV tại: {output_path}")
-
 
 def plot_comparison_methods(
     img_rgb, output_path="output_member1/methods_comparison.png"
@@ -602,58 +562,35 @@ def plot_comparison_methods(
     plt.tight_layout()
     plt.savefig(output_path, dpi=200, bbox_inches="tight")
     plt.close()
-    print(f"[+] Đã lưu bảng so sánh 5 phương pháp tại: {output_path}")
-
 
 def main():
-    print("\n" + "#" * 72)
-    print("  ĐỒ ÁN XỬ LÝ ẢNH - CHẠY NGHIỆM THU MODULE THÀNH VIÊN 1")
-    print("  ĐỀ TÀI: [CVPR'25] HVI COLOR SPACE FOR LOW-LIGHT IMAGE ENHANCEMENT")
-    print("#" * 72)
 
     output_dir = "output_member1"
     os.makedirs(output_dir, exist_ok=True)
-
-    print("[*] Đang khởi tạo cặp ảnh kiểm thử tổng hợp (Low-light & GroundTruth)...")
     test_low, test_gt = create_synthetic_test_pair(height=360, width=480)
     cv2.imwrite(
         os.path.join(output_dir, "test_input_dark.png"),
         cv2.cvtColor((test_low * 255).astype(np.uint8), cv2.COLOR_RGB2BGR),
     )
-
     compare_with_opencv(test_low)
-
-    print("[*] Đang tạo biểu đồ khảo sát tham số mật độ k in {0.5, 1, 3, 10, 50}...")
     plot_hvi_density_k(
         test_low,
         test_gt,
         k_values=[0.5, 1.0, 3.0, 10.0, 50.0],
         output_path=os.path.join(output_dir, "hvi_density_k.png"),
     )
-
-    print("[*] Đang xuất bản đồ lỗi màu E_HS vs E_HV (Bảng 13 bài báo CVPR 2025)...")
     plot_error_maps_ehs_vs_ehv(
         test_low,
         test_gt,
         k=1.0,
         output_path=os.path.join(output_dir, "error_map_ehs_vs_ehv.png"),
     )
-
-    print("[*] Đang vẽ bản đồ phân bố nhiễu màu mặt phẳng HS vs HV...")
     plot_hs_vs_hv_noise(
         test_low, output_path=os.path.join(output_dir, "noise_hs_vs_hv.png")
     )
-
-    print("[*] Đang xuất ảnh so sánh đối chứng 5 phương pháp (gồm cả CLAHE tự code)...")
     plot_comparison_methods(
         test_low, output_path=os.path.join(output_dir, "methods_comparison.png")
     )
-
-    print("\n" + "=" * 72)
-    print(" HOÀN TẤT 100% NHIỆM VỤ THÀNH VIÊN 1!")
-    print(" Toàn bộ ảnh thực nghiệm, biểu đồ và kết quả kiểm thử đã được lưu tại:")
-    print(f" -> {os.path.abspath(output_dir)}")
-    print("=" * 72 + "\n")
 
 
 if __name__ == "__main__":
