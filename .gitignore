@@ -1,0 +1,22 @@
+# Bỏ kho mã nguồn của bài báo gốc theo yêu cầu
+HVI-CIDNet/
+
+# Bỏ slide bài giảng và file PDF nặng
+drive-download-20261115T145639Z-1-001/
+2502.20272v2.pdf
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
