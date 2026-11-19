@@ -1,0 +1,6 @@
+dataset,n_images,mean_gray,pct_pixels_gray_le_40
+DICM,69,82.85,40.12
+LIME,10,36.81,62.72
+LOLv1,15,15.24,97.28
+LOLv2_Real,100,14.5,95.83
+MEF,17,41.5,70.91
