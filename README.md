@@ -1,89 +1,104 @@
-# ĐỒ ÁN MÔN HỌC: XỬ LÝ ẢNH (INT13146)
-**Học viện Công nghệ Bưu chính Viễn thông (PTIT) - Khoa CNTT 1**  
-**Giảng viên hướng dẫn:** TS. Phạm Hoàng Việt  
-**Đề tài:** `[CVPR'25] HVI: A New Color Space for Low-light Image Enhancement`  
-**Nhóm sinh viên thực hiện:** 4 thành viên (đóng góp chuyên môn 25% mỗi người)
+# Bài tập lớn môn Xử lý ảnh (INT13146)
+
+Học viện Công nghệ Bưu chính Viễn thông  
+Khoa Công nghệ Thông tin 1  
+Giảng viên hướng dẫn: TS. Phạm Hoàng Việt  
+Đề tài: HVI: A New Color Space for Low-light Image Enhancement (CVPR 2025)
 
 ---
 
-## 📌 BẢNG PHÂN CÔNG CHUYÊN MÔN & TÍCH HỢP 4 THÀNH VIÊN (25% / NGƯỜI)
+## 1. Phân công nhiệm vụ nhóm
 
-Theo quy định đề cương môn học, tỷ lệ đóng góp chỉ tính trên nội dung chuyên môn (thuật toán, cài đặt mã nguồn, thực nghiệm và tích hợp):
-
-| Thành viên | Tỷ lệ | Nội dung chuyên môn & Module phụ trách | Sản phẩm bàn giao tích hợp |
-| :--- | :---: | :--- | :--- |
-| **Thành viên 1** | 25% | **Toán học HVI & Code from scratch (NumPy thuần):**<br>• Biến đổi $sRGB \leftrightarrow HSV \leftrightarrow HVI$ (Eq. 1–6).<br>• Xóa nhiễu đứt gãy đỏ ($h_{polar}, v_{polar}$) và nhiễu đen ($C_k$).<br>• Tự code Gamma Correction, HE, CLAHE đối chứng OpenCV. | • File `color_space_scratch.py`<br>• Thư mục ảnh `output_member1/`<br>• Bản đồ lỗi $E_{HS}$ vs $E_{HV}$ (+6.11 dB) |
-| **Thành viên 2** | 25% | **Mạng 2 nhánh CIDNet & Khối LCA:**<br>• Nghiên cứu kiến trúc Dual-branch UNet (1.88M params, 7.57 GFLOPs).<br>• 6 khối Lighten Cross-Attention (CAB, IEL theo Retinex, CDL).<br>• Trích xuất đặc trưng trung gian 2 nhánh (I-branch & HV-branch). | • File `inspect_cidnet_features.py`<br>• Module kiến trúc `net/` và `loss/`<br>• Trực quan hóa 8 kênh kích hoạt cao nhất |
-| **Thành viên 3** | 25% | **Bộ dữ liệu test, Đánh giá định lượng & Phân tích lỗi:**<br>• Chuẩn bị tập test có cặp (LOL-v1, LOL-v2) & không cặp (DICM, LIME).<br>• Đo đạc PSNR, SSIM, LPIPS, NIQE giữa Tự code vs OpenCV vs CIDNet.<br>• Phân tích chuyên sâu 4 trường hợp thất bại (Failure Cases). | • File `eval.py`, `measure.py`, `failure_cases.py`<br>• Thư mục `failure_figures/`, `test_cases/`<br>• Toàn bộ 7 file số liệu `.csv` & `chay_tv3.ipynb` |
-| **Thành viên 4** | 25% | **Pipeline tích hợp, Biến đổi ngược PHVIT & Web Demo:**<br>• Tiền xử lý đệm đối xứng Reflect Padding $8 \times 8$ & Clip Operation.<br>• Biến đổi ngược PHVIT điều chỉnh độ sáng $\alpha_I$, độ bão hòa $\alpha_S$.<br>• Xây dựng giao diện tương tác Web Demo đặt cạnh nhau 3 phương pháp. | • File giao diện `app_demo.py` (Gradio)<br>• Thư mục ảnh `output_member4/`<br>• Tự động nạp weights local hoặc Hugging Face |
+| STT | Họ và tên | Mã sinh viên | Nhiệm vụ phụ trách | Sản phẩm mã nguồn / Kết quả | Tỷ lệ đóng góp |
+| :---: | :--- | :---: | :--- | :--- | :---: |
+| 1 | Lê Quang Huy | B23DCCN388 | Nghiên cứu lý thuyết không gian màu HVI; lập trình thuần NumPy các phép biến đổi sRGB <-> HSV <-> HVI, Gamma Correction, Histogram Equalization, CLAHE và đối chứng với OpenCV. | color_space_scratch.py<br>output_member1/ | 25% |
+| 2 | Nguyễn Khả Luận | B23DCCN514 | Nghiên cứu cấu trúc mạng CIDNet (Dual-branch UNet) và 6 khối Lighten Cross-Attention (LCA); trích xuất và trực quan hóa bản đồ đặc trưng (feature maps) trung gian. | inspect_cidnet_features.py<br>net/, loss/<br>output_tv2/ | 25% |
+| 3 | Nguyễn Quang Huy | B23DCCN402 | Chuẩn bị dữ liệu kiểm thử (LOL-v1, LOL-v2, DICM, LIME, ảnh tự chụp); đo đạc định lượng (PSNR, SSIM, LPIPS, NIQE); phân tích 4 trường hợp thất bại (Failure Cases). | eval.py, measure.py<br>failure_cases.py<br>failure_figures/<br>Các file .csv | 25% |
+| 4 | Nguyễn Đại Nghĩa | B23DCCN598 | Xây dựng pipeline tích hợp (Reflect Padding, Clip Operation); biến đổi ngược PHVIT với hệ số alpha_I, alpha_S; xây dựng giao diện Web Demo so sánh kết quả. | app_demo.py<br>output_member4/ | 25% |
 
 ---
 
-## 📂 CẤU TRÚC THƯ MỤC DỰ ÁN TÍCH HỢP
+## 2. Cấu trúc thư mục
 
 ```
 XLA/
-├── color_space_scratch.py       # [TV1] Biến đổi sRGB <-> HSV <-> HVI, Gamma, HE, CLAHE thuần NumPy
-├── inspect_cidnet_features.py   # [TV2] Trích xuất feature maps trung gian mạng CIDNet
-├── eval.py                      # [TV3] Pipeline đánh giá định lượng đa bộ dữ liệu
-├── measure.py                   # [TV3] Hàm tính chỉ số PSNR, SSIM, LPIPS, NIQE
-├── failure_cases.py             # [TV3] Tái hiện và đo đạc 4 trường hợp thất bại (Failure Cases)
-├── prepare_test_cases.py        # [TV3] Tiền xử lý và gom nhóm các ca kiểm thử
-├── app_demo.py                  # [TV4] Giao diện Web Demo trực quan (Gradio)
-├── asciiout.py                  # [TV3] Utility in ấn log terminal
-├── chay_tv3.ipynb               # [TV3] Jupyter Notebook chạy thực nghiệm định lượng
-├── net/                         # [Kiến trúc mạng CIDNet]
-│   ├── CIDNet.py                # Dual-branch UNet
-│   ├── LCA.py                   # Lighten Cross-Attention (CAB + IEL + CDL)
-│   ├── HVI_transform.py         # Module biến đổi HVI trong PyTorch
-│   └── transformer_utils.py     # Lớp bổ trợ Transformer
-├── loss/                        # [Hàm mất mát huấn luyện]
-│   └── losses.py                # L1, SSIM, Edge Loss, Perceptual VGG Loss
-├── output_member1/              # [TV1] Ảnh thực nghiệm HVI, khảo sát k, bản đồ lỗi E_HS vs E_HV
-├── output_member4/              # [TV4] Ảnh thực nghiệm Web Demo, k-sweep, alpha-sweep
-├── failure_figures/             # [TV3] Ảnh minh chứng 4 trường hợp thất bại
-├── test_cases/                  # [TV3] Bộ ảnh kiểm thử phân loại (LOLv1, LOLv2, DICM, LIME, custom)
-├── results/                     # [TV3] Kết quả ảnh đầu ra của các thuật toán
-├── anh_goc/                     # Bộ ảnh gốc test
-├── *.csv                        # Bảng số liệu định lượng (quantitative_results, failure_metrics...)
-├── Ke_Hoach_Trien_Khai_...docx  # Kế hoạch phân công 4 thành viên (25%/người)
-├── Khung_Bao_Cao_11_Muc_...docx # Khung báo cáo chi tiết 11 mục và kịch bản thuyết trình
-└── README.md                    # Tài liệu hướng dẫn tích hợp toàn dự án
+├── color_space_scratch.py      # [TV1] Biến đổi hệ màu và thuật toán kinh điển bằng NumPy
+├── inspect_cidnet_features.py  # [TV2] Trích xuất feature maps trung gian của mạng CIDNet
+├── eval.py                     # [TV3] Đánh giá định lượng trên các tập dữ liệu
+├── measure.py                  # [TV3] Hàm đo các chỉ số PSNR, SSIM, LPIPS, NIQE
+├── failure_cases.py            # [TV3] Tái hiện và đo đạc 4 ca thất bại
+├── prepare_test_cases.py       # [TV3] Tiền xử lý dữ liệu kiểm thử
+├── asciiout.py                 # [TV3] Tiện ích in ấn terminal không dấu
+├── chay_tv3.ipynb              # [TV3] Notebook chạy thử nghiệm định lượng
+├── app_demo.py                 # [TV4] Giao diện ứng dụng Web tương tác (Gradio)
+├── net/                        # Kiến trúc mô hình mạng nơ-ron CIDNet
+│   ├── CIDNet.py               # Mạng 2 nhánh Dual-branch UNet
+│   ├── LCA.py                  # Khối Lighten Cross-Attention
+│   ├── HVI_transform.py        # Module biến đổi HVI dạng tensor PyTorch
+│   └── transformer_utils.py    # Lớp bổ trợ Transformer
+├── loss/                       # Các hàm mất mát huấn luyện (L1, SSIM, Edge, VGG)
+├── output_member1/             # Kết quả thực nghiệm của TV1 (đối chứng OpenCV, bản đồ sai số E_HV)
+├── output_tv2/                 # Bản đồ đặc trưng trích xuất của TV2
+├── failure_figures/            # Hình ảnh minh chứng 4 trường hợp thất bại của TV3
+├── output_member4/             # Kết quả chạy thực nghiệm Web Demo của TV4
+├── anh_goc/                    # Bộ ảnh tối thực tế do nhóm tự chụp
+├── *.csv                       # Bảng dữ liệu định lượng trích xuất từ thực nghiệm
+└── README.md                   # Hướng dẫn dự án
 ```
 
 ---
 
-## 🚀 HƯỚNG DẪN CÀI ĐẶT & CHẠY TỪNG MODULE
+## 3. Hướng dẫn cài đặt và chạy chương trình
 
-### 1. Cài đặt môi trường
-Khuyến nghị Python 3.10+:
+### 3.1. Cài đặt môi trường
+
+Yêu cầu môi trường Python 3.10 trở lên. Cài đặt các thư viện phụ thuộc:
+
 ```bash
 pip install numpy opencv-python scikit-image matplotlib pandas pillow torch torchvision einops gradio huggingface_hub safetensors
 ```
 
-### 2. Chạy Module Thành viên 1 (Toán học HVI & Thuật toán cổ điển)
+### 3.2. Chạy module tự lập trình bằng NumPy (Thành viên 1)
+
+Chạy kiểm thử các hàm biến đổi hệ màu sRGB - HSV - HVI và các thuật toán Gamma, HE, CLAHE đối chứng với OpenCV:
+
 ```bash
 python color_space_scratch.py
 ```
-* Kết quả đo sai số với OpenCV (MSE = 0.000000 trên HE, MAE = 0.000000 trên chu trình HVI) và 5 ảnh trực quan hóa lưu tại `output_member1/`.
 
-### 3. Chạy Module Thành viên 2 (Trích xuất đặc trưng mạng CIDNet)
+Kết quả in ra terminal đo sai số (MSE/MAE) và các ảnh trực quan hóa được lưu vào thư mục `output_member1/`.
+
+### 3.3. Chạy trích xuất đặc trưng mạng CIDNet (Thành viên 2)
+
+Trích xuất bản đồ đặc trưng tại các tầng trung gian của mô hình:
+
 ```bash
-# Trích xuất đặc trưng trên một ảnh bất kỳ
-python inspect_cidnet_features.py --img anh_goc/00767.png --save_dir output_tv2
+python inspect_cidnet_features.py --img anh_goc/night_01.jpg --save_dir output_tv2
 ```
 
-### 4. Chạy Module Thành viên 3 (Đánh giá định lượng & Phân tích thất bại)
-```bash
-# Phân tích 4 trường hợp thất bại (Failure Cases)
-python failure_cases.py
+Ảnh phân tích đặc trưng của 2 nhánh Intensity và Hue-Saturation được lưu tại thư mục `output_tv2/`.
 
-# Đánh giá chỉ số chất lượng ảnh
+### 3.4. Chạy đánh giá định lượng và phân tích ca thất bại (Thành viên 3)
+
+Phân tích 4 trường hợp thất bại của mô hình:
+
+```bash
+python failure_cases.py
+```
+
+Đo lường các chỉ số PSNR, SSIM, NIQE trên tập dữ liệu:
+
+```bash
 python eval.py evaluate
 ```
 
-### 5. Chạy Module Thành viên 4 (Giao diện Web Demo trực quan)
+### 3.5. Chạy giao diện Web Demo (Thành viên 4)
+
+Khởi động giao diện web so sánh trực quan các phương pháp:
+
 ```bash
 python app_demo.py
 ```
-* Mở trình duyệt tại địa chỉ: `http://127.0.0.1:7860` để tải ảnh thật, kéo thả tham số $\alpha_I, \alpha_S, k$, và xem kết quả đối chiếu trực tiếp giữa: **Tự code (TV1) ↔ OpenCV ↔ HVI-CIDNet (TV2 & TV4)**.
+
+Mở trình duyệt truy cập: `http://127.0.0.1:7860`.  
+Giao diện cho phép tải ảnh, điều chỉnh thanh trượt alpha_I, alpha_S, k và đối chiếu đồng thời: Ảnh gốc, Thuật toán cổ điển tự code (TV1), OpenCV và Mô hình HVI-CIDNet (TV2 & TV4).

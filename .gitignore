@@ -25,3 +25,11 @@ venv/
 .idea/
 *.swp
 *.swo
+
+# Word/Office temp and lock files
+~$*
+.~lock.*#
+*.tmp
+Ke_Hoach_Trien_Khai_*.docx
+Khung_Bao_Cao_*.docx
+build_full_report_docx.py
